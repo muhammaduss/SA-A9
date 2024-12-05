@@ -1,10 +1,10 @@
 import json
 from fastapi import FastAPI
-from .schemas import ReceiveMessage
+from schemas import ReceiveMessage
 from pika import BlockingConnection, ConnectionParameters
 
 connection_parameters = ConnectionParameters(
-    host='localhost',
+    host='rabbitmq',
     port=5672
 )
 
