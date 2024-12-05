@@ -1,3 +1,4 @@
+import json
 from fastapi import FastAPI
 from .schemas import ReceiveMessage
 from pika import BlockingConnection, ConnectionParameters
@@ -18,6 +19,7 @@ async def post_recieve_message(data: ReceiveMessage):
             ch.basic_publish(
                 exchange="",
                 routing_key="messages",
-                body=data.message
+                body=json.dumps(
+                    {'user_alias': data.user_alias, 'message': data.message})
             )
-            print('message sent')
+            print('Message sent to filter service')

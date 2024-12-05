@@ -1,3 +1,4 @@
+import json
 from pika import BlockingConnection, ConnectionParameters
 
 connection_parameters = ConnectionParameters(
@@ -7,10 +8,10 @@ connection_parameters = ConnectionParameters(
 
 
 def process_message(ch, method, properties, body: bytes):
-    message = body.decode()
+    message = json.loads(body)
     print(
-        'Consumer info: Received message: ' +
-        f'"{message}" from User-Facing service')
+        f'Consumer info: Received message from user: "{message['user_alias']}"'
+        + f' a message: "{message['message']}"')
 
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
@@ -18,8 +19,9 @@ def process_message(ch, method, properties, body: bytes):
 
 
 def producer(ch, message):
-    if ("bird-watching" in message or "ailurophobia" in message
-            or "mango" in message):
+    if ("bird-watching" in message['message'] or
+            "ailurophobia" in message['message'] or
+            "mango" in message['message']):
         print("Producer info: Stop-word detected, " +
               "message won't be send further\n")
     else:
@@ -27,7 +29,7 @@ def producer(ch, message):
         ch.basic_publish(
             exchange="",
             routing_key="messages_scream",
-            body=message
+            body=json.dumps(message)
         )
         print("Producer info: Message sent to SCREAMING service\n")
 
