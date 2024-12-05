@@ -11,7 +11,7 @@ def main():
         with conn.channel() as ch:
             ch.queue_declare(queue='messages')
 
-            ch.basic_pubclish(
+            ch.basic_publish(
                 exchange="",
                 routing_key="messages",
                 body="Hello RabbitMQ!"
