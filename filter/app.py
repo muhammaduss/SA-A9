@@ -1,17 +1,31 @@
+print("run docker service")
 import json
+import time
 from pika import BlockingConnection, ConnectionParameters
+from pika.exceptions import AMQPConnectionError
 
 connection_parameters = ConnectionParameters(
     host='rabbitmq',
     port=5672
 )
 
+def wait_for_rabbitmq():
+    while True:
+        try:
+            connection = BlockingConnection(connection_parameters)
+            connection.close()
+            print("RabbitMQ is ready!")
+            break
+        except AMQPConnectionError:
+            print("Waiting for RabbitMQ...")
+            time.sleep(5)
+
+
 
 def process_message(ch, method, properties, body: bytes):
     message = json.loads(body)
-    print(
-        f'Consumer info: Received message from user: "{message['user_alias']}"'
-        + f' a message: "{message['message']}"')
+    print(f'''Consumer info: Received message from user: "{message['user_alias']}"'''
+          f''' a message: "{message['message']}"''')
 
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
@@ -47,4 +61,5 @@ def consumer():
 
 
 if __name__ == '__main__':
+    wait_for_rabbitmq()
     consumer()
