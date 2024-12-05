@@ -4,10 +4,10 @@ connection_parameters = ConnectionParameters(
     host='localhost',
     port=5672
 )
-def process_message(*args):
-    for arg in args:
-        print(arg, '\n\n')
+def process_message(ch, method, properties, body: bytes):
+    print(body.decode())
 
+    ch.basic_ack(delivery_tag=method.delivery_tag)
 
 def main():
     with BlockingConnection(connection_parameters) as conn:
