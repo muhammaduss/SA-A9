@@ -8,16 +8,12 @@ Anushervon Qodirzoda | Ilias Dzhabbarov  |  Muhammad Allayarov
 
 ## Installation
 
-1. Clone the repo
-2. Create an environment and activate (bash script for linux)
+1. Install docker
+2. Run the docker app
 ```bash
-python3 -m venv venv
-source venv/bin/activate
+docker compose up --build
 ```
-3. Install dependencies
-```bash
-pip install pip-requirements.txt
-```
+
 
 ## Demo
 
