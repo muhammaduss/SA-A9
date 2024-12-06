@@ -24,7 +24,7 @@ services:
       - rabbitmq
     environment:
       - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_PORT=5673
+      - RABBITMQ_PORT=5672
 
   filter:
     build:
@@ -38,4 +38,19 @@ services:
 
     environment:
       - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_PORT=5673
+      - RABBITMQ_PORT=5672
+
+  screamer:
+    build:
+      context: ./filter
+      dockerfile: Dockerfile
+    container_name: screamer_service
+
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+
