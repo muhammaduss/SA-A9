@@ -6,7 +6,6 @@ import logging
 
 
 logging.basicConfig(level=logging.INFO)
-print("run docker service")
 
 connection_parameters = ConnectionParameters(
     host='rabbitmq',
