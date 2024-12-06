@@ -24,6 +24,7 @@ logging.basicConfig(
 
 connection_parameters = ConnectionParameters(host="rabbitmq", port=5672)
 
+
 def wait_for_rabbitmq():
     while True:
         try:
@@ -35,7 +36,7 @@ def wait_for_rabbitmq():
             logging.info("Waiting for RabbitMQ...")
             time.sleep(5)
 
-    
+
 def process_message(ch, method, properties, body: bytes):
     message = json.loads(body)
     logging.info(
@@ -68,11 +69,11 @@ def send_email(message):
         server.set_debuglevel(1)
         server.starttls()
         server.login(from_m, password)
-        for i in email_addresses: 
+        for i in email_addresses:
             msg = MIMEMultipart()
             msg["From"] = from_m
-            msg["To"] = i 
-            msg["Subject"] = "Testing"    
+            msg["To"] = i
+            msg["Subject"] = "Testing"
             logging.info("From: %s, To: %s", from_m, i)
             msg.attach(MIMEText(message, "plain"))
             text = msg.as_string()

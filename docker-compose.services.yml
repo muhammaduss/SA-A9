@@ -15,7 +15,7 @@ services:
 
   api:
     build:
-      context: ./api
+      context: ./app/api
       dockerfile: Dockerfile
     container_name: api_service
     ports:
@@ -28,7 +28,7 @@ services:
 
   filter:
     build:
-      context: ./filter
+      context: ./app/filter
       dockerfile: Dockerfile
     container_name: filter_service
 
@@ -43,7 +43,7 @@ services:
 
   screamer:
     build:
-      context: ./screamer
+      context: ./app/screamer
       dockerfile: Dockerfile
     container_name: screamer_service
 
@@ -58,7 +58,7 @@ services:
 
   publisher:
     build:
-      context: ./publisher
+      context: ./app/publisher
       dockerfile: Dockerfile
     container_name: publisher_service
     env_file: .env
