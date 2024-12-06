@@ -1,9 +1,18 @@
-import smtplib 
-from email.mime.text import MIMEText 
-from email.mime.multipart import MIMEMultipart 
-
 import os
+import smtplib
+import json
+import logging
+import sys
+import time
+
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+from pika.exceptions import AMQPConnectionError
+from pika import BlockingConnection, ConnectionParameters
+
 from dotenv import load_dotenv
+
 load_dotenv()
 
 logging.basicConfig(
@@ -85,6 +94,12 @@ def consumer():
             ch.start_consuming()
 
 
+<<<<<<< HEAD
 if __name__ == "__main__":
     wait_for_rabbitmq()
     consumer()
+=======
+if name == "main":
+    wait_for_rabbitmq()
+    consumer()
+>>>>>>> main
