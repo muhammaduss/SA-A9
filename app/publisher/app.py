@@ -95,6 +95,7 @@ def consumer():
             ch.start_consuming()
 
 
-if name == "main":
+if __name__ == "__main__":
     wait_for_rabbitmq()
     consumer()
+
