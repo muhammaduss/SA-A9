@@ -24,6 +24,7 @@ logging.basicConfig(
 
 connection_parameters = ConnectionParameters(host="rabbitmq", port=5672)
 
+
 def wait_for_rabbitmq():
     while True:
         try:
@@ -35,7 +36,7 @@ def wait_for_rabbitmq():
             logging.info("Waiting for RabbitMQ...")
             time.sleep(5)
 
-    
+
 def process_message(ch, method, properties, body: bytes):
     message = json.loads(body)
     logging.info(
@@ -55,25 +56,30 @@ def process_message(ch, method, properties, body: bytes):
 
 def send_email(message):
     from_m = os.getenv("FROM")
-    to_m = os.getenv("TO")
+    list_mails = os.getenv("LIST_MAILS")
     password = os.getenv("PASS")
-    logging.info("From: %s, To: %s", from_m, to_m)
-    msg = MIMEMultipart()
-    msg["From"] = from_m
-    msg["To"] = to_m
-    msg["Subject"] = "Testing"
-
-    msg.attach(MIMEText(message, "plain"))
+    try:
+        email_addresses = json.loads(list_mails)
+    except json.JSONDecodeError as e:
+        logging.error(f"Error parsing LIST_MAILS: {e}")
+        return
 
     try:
         server = smtplib.SMTP("smtp.gmail.com", 587, timeout=10)
         server.set_debuglevel(1)
         server.starttls()
         server.login(from_m, password)
-        text = msg.as_string()
-        server.sendmail(from_m, to_m, text)
+        for i in email_addresses:
+            msg = MIMEMultipart()
+            msg["From"] = from_m
+            msg["To"] = i
+            msg["Subject"] = "Testing"
+            logging.info("From: %s, To: %s", from_m, i)
+            msg.attach(MIMEText(message, "plain"))
+            text = msg.as_string()
+            server.sendmail(from_m, i, text)
+            logging.info("Send email")
         server.quit()
-        logging.info("Send email")
     except Exception as e:
         logging.info(f"Error {e}")
 
