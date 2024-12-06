@@ -1,6 +1,9 @@
 import os
 import smtplib
 import json
+import logging
+import sys
+
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from pika import BlockingConnection, ConnectionParameters
@@ -8,18 +11,19 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+logging.basicConfig(level=logging.INFO, stream=sys.stdout, format="%(asctime)s | publisher | %(levelname)s | %(message)s")
+
 
 connection_parameters = ConnectionParameters(
-    host='localhost',
+    host='rabbitmq',
     port=5672
 )
 
 
 def process_message(ch, method, properties, body: bytes):
     message = json.loads(body)
-    print(
-        f'Consumer info: Received message from user: "{message['user_alias']}"'
-        + f' a message: "{message['message']}"')
+    print(f'''Consumer info: Received message from user: "{message['user_alias']}"'''
+          f''' a message: "{message['message']}"''')
 
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
