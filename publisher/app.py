@@ -3,10 +3,14 @@ import smtplib
 import json
 import logging
 import sys
+import time
 
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+
+from pika.exceptions import AMQPConnectionError
 from pika import BlockingConnection, ConnectionParameters
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -20,7 +24,18 @@ logging.basicConfig(
 
 connection_parameters = ConnectionParameters(host="rabbitmq", port=5672)
 
+def wait_for_rabbitmq():
+    while True:
+        try:
+            connection = BlockingConnection(connection_parameters)
+            connection.close()
+            logging.info('connection with rabbitmq established..')
+            break
+        except AMQPConnectionError:
+            logging.info("Waiting for RabbitMQ...")
+            time.sleep(5)
 
+    
 def process_message(ch, method, properties, body: bytes):
     message = json.loads(body)
     logging.info(
@@ -75,4 +90,5 @@ def consumer():
 
 
 if __name__ == "__main__":
+    wait_for_rabbitmq()
     consumer()
