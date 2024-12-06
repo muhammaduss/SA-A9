@@ -2,7 +2,7 @@ import json
 from pika import BlockingConnection, ConnectionParameters
 
 connection_parameters = ConnectionParameters(
-    host='localhost',
+    host='rabbitmq',
     port=5672
 )
 
