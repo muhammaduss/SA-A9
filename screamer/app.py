@@ -1,8 +1,10 @@
 import logging
 import sys
-
+import time
 import json
+
 from pika import BlockingConnection, ConnectionParameters
+from pika.exceptions import AMQPConnectionError
 
 logging.basicConfig(level=logging.INFO, stream=sys.stdout, format="%(asctime)s | screamer | %(levelname)s | %(message)s")
 
@@ -10,6 +12,17 @@ connection_parameters = ConnectionParameters(
     host='rabbitmq',
     port=5672
 )
+
+def wait_for_rabbitmq():
+    while True:
+        try:
+            connection = BlockingConnection(connection_parameters)
+            connection.close()
+            logging.info('connection with rabbitmq established..')
+            break
+        except AMQPConnectionError:
+            logging.info("Waiting for RabbitMQ...")
+            time.sleep(5)
 
 
 def process_message(ch, method, properties, body: bytes):
@@ -46,4 +59,5 @@ def consumer():
 
 
 if __name__ == '__main__':
+    wait_for_rabbitmq()
     consumer()
