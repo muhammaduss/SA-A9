@@ -72,4 +72,8 @@ Dividing by 100 we get: ~3.17769 seconds per message or ~18.88164 messages per m
 
 ## Sources and links
 
+<<<<<<< HEAD
 [Application passwords for google](https://myaccount.google.com/apppasswords)
+=======
+[Application passwords for google](https://myaccount.google.com/apppasswords)
+>>>>>>> main
