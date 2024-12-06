@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 import logging
 import sys
 import json
+import datetime
 from fastapi import FastAPI
 from multiprocessing import Process
 
@@ -45,5 +46,6 @@ app = FastAPI(title="User-Facing REST API Documentation", lifespan=lifespan)
 
 @app.post("/recieve")
 async def post_recieve_message(data: ReceiveMessage):
+    logging.info(f"Message sent at: {datetime.datetime.now()}")
     app.state.pipeline_start.input_queue.put(data.message)
     return {"status": "message queued"}

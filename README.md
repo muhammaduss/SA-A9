@@ -13,13 +13,18 @@ Anushervon Qodirzoda | Ilias Dzhabbarov  |  Muhammad Allayarov
 ```
 FROM - sender email
 PASS - sender's application password (on google accounts 2FA required)
-TO - reciever email
+LIST_EMAILS - recievers email
 ```
 
 3. Run the docker app
-```bash
-docker compose up --build
-```
+   - **Event driven version** (deploy multiple units):
+     ```bash
+     docker-compose -f docker-compose.services.yml up --build
+     ```
+   - **Pipes version** (deploy one Python script and RabbitMQ):
+     ```bash
+     docker-compose -f docker-compose.pipes.yml up --build
+     ```
 
 
 ## Testing the systems
@@ -64,16 +69,22 @@ Dividing by 100 we get: ~3.17769 seconds per message or ~18.88164 messages per m
 
 #### 1 message.
 
-#### 100 messages.
+Message typed at: 
+
+`api  | 2024-12-06 20:54:35,051 | pipe | INFO | Message sent at: 2024-12-06 20:54:35.051314`
+
+Message delivered at:
+
+`api  | 2024-12-06 20:54:39,609 | pipe | INFO | Send email at 2024-12-06 20:54:39.609030`
+
+Time for sending one email: ~4.558 seconds, which is longer.
+
+So, brokers are faster
 
 ## Demo
 
-[Link]()
+[Link](https://youtu.be/7V3cgLZk8iU)
 
 ## Sources and links
 
-<<<<<<< HEAD
 [Application passwords for google](https://myaccount.google.com/apppasswords)
-=======
-[Application passwords for google](https://myaccount.google.com/apppasswords)
->>>>>>> main

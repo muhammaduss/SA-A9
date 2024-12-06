@@ -1,4 +1,5 @@
 from __future__ import annotations
+from dotenv import load_dotenv
 
 from dataclasses import dataclass, field
 
@@ -12,13 +13,15 @@ from abc import ABC, abstractmethod
 import os
 import smtplib
 import sys
+import datetime
 import logging
-
-from dotenv import load_dotenv
+logging.basicConfig(
+    level=logging.INFO,
+    stream=sys.stdout,
+    format="%(asctime)s | pipe | %(levelname)s | %(message)s",
+)
 
 load_dotenv()
-
-
 
 
 @dataclass
@@ -66,7 +69,7 @@ class Screamer(Filter):
         return message.upper()
 
 
-class Publisher(Filter): 
+class Publisher(Filter):
     def apply(self, message):
         from_m = os.getenv("FROM")
         list_mails = os.getenv("LIST_MAILS")
@@ -82,19 +85,18 @@ class Publisher(Filter):
             server.set_debuglevel(1)
             server.starttls()
             server.login(from_m, password)
-            for i in email_addresses: 
+            for i in email_addresses:
                 msg = MIMEMultipart()
                 msg["From"] = from_m
-                msg["To"] = i 
-                msg["Subject"] = "Testing"    
+                msg["To"] = i
+                msg["Subject"] = "Testing"
                 logging.info("From: %s, To: %s", from_m, i)
                 msg.attach(MIMEText(message, "plain"))
                 text = msg.as_string()
                 server.sendmail(from_m, i, text)
-                logging.info("Send email")
+                logging.info(f"Send email at {datetime.datetime.now()}")
             server.quit()
         except Exception as e:
             logging.info(f"Error {e}")
 
         return message
-        
