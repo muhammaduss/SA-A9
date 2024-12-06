@@ -11,25 +11,27 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-logging.basicConfig(level=logging.INFO, stream=sys.stdout, format="%(asctime)s | publisher | %(levelname)s | %(message)s")
-
-
-connection_parameters = ConnectionParameters(
-    host='rabbitmq',
-    port=5672
+logging.basicConfig(
+    level=logging.INFO,
+    stream=sys.stdout,
+    format="%(asctime)s | publisher | %(levelname)s | %(message)s",
 )
+
+
+connection_parameters = ConnectionParameters(host="rabbitmq", port=5672)
 
 
 def process_message(ch, method, properties, body: bytes):
     message = json.loads(body)
-    logging.info(f'''Consumer info: Received message from user: "{message['user_alias']}"'''
-          f''' a message: "{message['message']}"''')
+    logging.info(
+        f'''Consumer info: Received message from user: "{message['user_alias']}"'''
+        f''' a message: "{message['message']}"'''
+    )
 
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
     email_message = (
-        f"From user: {message['user_alias']}\n"
-        f"Message: {message['message']}"
+        f"From user: {message['user_alias']}\n" f"Message: {message['message']}"
     )
 
     send_email(email_message)
@@ -37,16 +39,16 @@ def process_message(ch, method, properties, body: bytes):
 
 
 def send_email(message):
-    from_m = os.getenv('FROM')
-    to_m = os.getenv('TO')
-    password = os.getenv('PASS')
+    from_m = os.getenv("FROM")
+    to_m = os.getenv("TO")
+    password = os.getenv("PASS")
     logging.info(from_m, to_m, password)
     msg = MIMEMultipart()
-    msg['From'] = from_m
-    msg['To'] = to_m
-    msg['Subject'] = "Testing"
+    msg["From"] = from_m
+    msg["To"] = to_m
+    msg["Subject"] = "Testing"
 
-    msg.attach(MIMEText(message, 'plain'))
+    msg.attach(MIMEText(message, "plain"))
 
     try:
         server = smtplib.SMTP("smtp.gmail.com", 587, timeout=10)
@@ -64,12 +66,11 @@ def send_email(message):
 def consumer():
     with BlockingConnection(connection_parameters) as conn:
         with conn.channel() as ch:
-            ch.queue_declare(queue='messages_publisher')
+            ch.queue_declare(queue="messages_publisher")
             ch.basic_consume(
-                queue="messages_publisher",
-                on_message_callback=process_message
+                queue="messages_publisher", on_message_callback=process_message
             )
-            logging.info('waiting for messages...')
+            logging.info("waiting for messages...")
             ch.start_consuming()
 
 
