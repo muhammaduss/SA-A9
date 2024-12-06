@@ -57,7 +57,7 @@ def send_email(message):
     from_m = os.getenv("FROM")
     to_m = os.getenv("TO")
     password = os.getenv("PASS")
-    logging.info(from_m, to_m, password)
+    logging.info("From: %s, To: %s", from_m, to_m)
     msg = MIMEMultipart()
     msg["From"] = from_m
     msg["To"] = to_m
