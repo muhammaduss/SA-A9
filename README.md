@@ -6,13 +6,19 @@ Team ID: 3
 
 Anushervon Qodirzoda | Ilias Dzhabbarov  |  Muhammad Allayarov
 
-## Installation
+### Installation
 
-1. Install docker
-2. Run the docker app
-```bash
-docker compose up --build
-```
+1. Install Docker.
+2. Run the Docker app:
+   - **Microservices version** (deploy multiple units):
+     ```bash
+     docker-compose -f docker-compose.services.yml up --build
+     ```
+   - **Pipes version** (deploy one Python script and RabbitMQ):
+     ```bash
+     docker-compose -f docker-compose.pipes.yml up --build
+     ```
+
 
 
 ## Demo
