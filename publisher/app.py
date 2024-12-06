@@ -22,7 +22,7 @@ connection_parameters = ConnectionParameters(
 
 def process_message(ch, method, properties, body: bytes):
     message = json.loads(body)
-    print(f'''Consumer info: Received message from user: "{message['user_alias']}"'''
+    logging.info(f'''Consumer info: Received message from user: "{message['user_alias']}"'''
           f''' a message: "{message['message']}"''')
 
     ch.basic_ack(delivery_tag=method.delivery_tag)
@@ -33,14 +33,14 @@ def process_message(ch, method, properties, body: bytes):
     )
 
     send_email(email_message)
-    # print(email_message)
+    # logging.info(email_message)
 
 
 def send_email(message):
     from_m = os.getenv('FROM')
     to_m = os.getenv('TO')
     password = os.getenv('PASS')
-    print(from_m, to_m, password)
+    logging.info(from_m, to_m, password)
     msg = MIMEMultipart()
     msg['From'] = from_m
     msg['To'] = to_m
@@ -56,9 +56,9 @@ def send_email(message):
         text = msg.as_string()
         server.sendmail(from_m, to_m, text)
         server.quit()
-        print("Send email")
+        logging.info("Send email")
     except Exception as e:
-        print(f"Error {e}")
+        logging.info(f"Error {e}")
 
 
 def consumer():
@@ -69,7 +69,7 @@ def consumer():
                 queue="messages_publisher",
                 on_message_callback=process_message
             )
-            print('waiting for messages...')
+            logging.info('waiting for messages...')
             ch.start_consuming()
 
 
