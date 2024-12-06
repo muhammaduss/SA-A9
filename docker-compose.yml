@@ -1,3 +1,4 @@
+version: "2.4"
 services:
   rabbitmq:
     image: rabbitmq:3.10.7-management
@@ -7,10 +8,10 @@ services:
       - 5673:5673
     healthcheck:
       test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping || exit 1"]
-      interval: 10s
+      interval: 20s
       timeout: 5s
       retries: 5
-      start_period: 30s
+      start_period: 120s
 
 
   api:
@@ -35,6 +36,7 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+        restart: true
 
     environment:
       - RABBITMQ_HOST=rabbitmq
@@ -49,6 +51,7 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+        restart: true
 
     environment:
       - RABBITMQ_HOST=rabbitmq
