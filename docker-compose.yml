@@ -42,7 +42,7 @@ services:
 
   screamer:
     build:
-      context: ./filter
+      context: ./screamer
       dockerfile: Dockerfile
     container_name: screamer_service
 
