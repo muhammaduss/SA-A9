@@ -6,30 +6,85 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
+logging.basicConfig(
+    level=logging.INFO,
+    stream=sys.stdout,
+    format="%(asctime)s | publisher | %(levelname)s | %(message)s",
+)
 
-print("tests")
-def send_email (message): 
-    from_m = os.getenv('FROM')
-    to_m = os.getenv('TO')
-    password = os.getenv('PASS')
-    print(from_m, to_m, password)
-    msg = MIMEMultipart()
-    msg['From'] = from_m 
-    msg['To'] = to_m 
-    msg['Subject'] = "Testing"
 
-    msg.attach(MIMEText(message, 'plain'))
+connection_parameters = ConnectionParameters(host="rabbitmq", port=5672)
+
+def wait_for_rabbitmq():
+    while True:
+        try:
+            connection = BlockingConnection(connection_parameters)
+            connection.close()
+            logging.info('connection with rabbitmq established..')
+            break
+        except AMQPConnectionError:
+            logging.info("Waiting for RabbitMQ...")
+            time.sleep(5)
+
     
-    try: 
-        server = smtplib.SMTP("smtp.gmail.com", 587, timeout=10) 
-        server.set_debuglevel(1) 
+def process_message(ch, method, properties, body: bytes):
+    message = json.loads(body)
+    logging.info(
+        f'''Consumer info: Received message from user: "{message['user_alias']}"'''
+        f''' a message: "{message['message']}"'''
+    )
+
+    ch.basic_ack(delivery_tag=method.delivery_tag)
+
+    email_message = (
+        f"From user: {message['user_alias']}\n" f"Message: {message['message']}"
+    )
+
+    send_email(email_message)
+    # logging.info(email_message)
+
+
+def send_email(message):
+    from_m = os.getenv("FROM")
+    list_mails = os.getenv("LIST_MAILS")
+    password = os.getenv("PASS")
+    try:
+        email_addresses = json.loads(list_mails)
+    except json.JSONDecodeError as e:
+        logging.error(f"Error parsing LIST_MAILS: {e}")
+        return
+
+    try:
+        server = smtplib.SMTP("smtp.gmail.com", 587, timeout=10)
+        server.set_debuglevel(1)
         server.starttls()
         server.login(from_m, password)
-        text = msg.as_string()
-        server.sendmail(from_m, to_m, text) 
+        for i in email_addresses: 
+            msg = MIMEMultipart()
+            msg["From"] = from_m
+            msg["To"] = i 
+            msg["Subject"] = "Testing"    
+            logging.info("From: %s, To: %s", from_m, i)
+            msg.attach(MIMEText(message, "plain"))
+            text = msg.as_string()
+            server.sendmail(from_m, i, text)
+            logging.info("Send email")
         server.quit()
-        print(f"Send email")
-    except Exception as e: 
-        print(f"Error {e}")
-        
-send_email("It is testing message")
+    except Exception as e:
+        logging.info(f"Error {e}")
+
+
+def consumer():
+    with BlockingConnection(connection_parameters) as conn:
+        with conn.channel() as ch:
+            ch.queue_declare(queue="messages_publisher")
+            ch.basic_consume(
+                queue="messages_publisher", on_message_callback=process_message
+            )
+            logging.info("waiting for messages...")
+            ch.start_consuming()
+
+
+if __name__ == "__main__":
+    wait_for_rabbitmq()
+    consumer()
