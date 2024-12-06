@@ -1,31 +1,35 @@
-print("run docker service")
 import json
-import time
-from pika import BlockingConnection, ConnectionParameters
 from pika.exceptions import AMQPConnectionError
+from pika import BlockingConnection, ConnectionParameters
+import time
+import logging
+
+
+logging.basicConfig(level=logging.INFO)
+print("run docker service")
 
 connection_parameters = ConnectionParameters(
     host='rabbitmq',
     port=5672
 )
 
+
 def wait_for_rabbitmq():
     while True:
         try:
             connection = BlockingConnection(connection_parameters)
             connection.close()
-            print("RabbitMQ is ready!")
+            logging.info('connection with rabbitmq established..')
             break
         except AMQPConnectionError:
-            print("Waiting for RabbitMQ...")
+            logging.info("Waiting for RabbitMQ...")
             time.sleep(5)
-
 
 
 def process_message(ch, method, properties, body: bytes):
     message = json.loads(body)
-    print(f'''Consumer info: Received message from user: "{message['user_alias']}"'''
-          f''' a message: "{message['message']}"''')
+    logging.info(f'''Consumer info: Received message from user: "{message['user_alias']}"'''
+                 f''' a message: "{message['message']}"''')
 
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
@@ -36,8 +40,8 @@ def producer(ch, message):
     if ("bird-watching" in message['message'] or
             "ailurophobia" in message['message'] or
             "mango" in message['message']):
-        print("Producer info: Stop-word detected, " +
-              "message won't be send further\n")
+        logging.info("Producer info: Stop-word detected, " +
+                     "message won't be send further\n")
     else:
         ch.queue_declare(queue='messages_scream')
         ch.basic_publish(
@@ -45,7 +49,7 @@ def producer(ch, message):
             routing_key="messages_scream",
             body=json.dumps(message)
         )
-        print("Producer info: Message sent to SCREAMING service\n")
+        logging.info("Producer info: Message sent to SCREAMING service\n")
 
 
 def consumer():
@@ -56,8 +60,9 @@ def consumer():
                 queue="messages",
                 on_message_callback=process_message
             )
-            print('waiting for messages...')
             ch.start_consuming()
+
+            logging.info('waiting for messages...')
 
 
 if __name__ == '__main__':
