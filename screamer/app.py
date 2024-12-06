@@ -1,17 +1,34 @@
+import logging
+import sys
+import time
 import json
+
 from pika import BlockingConnection, ConnectionParameters
+from pika.exceptions import AMQPConnectionError
+
+logging.basicConfig(level=logging.INFO, stream=sys.stdout, format="%(asctime)s | screamer | %(levelname)s | %(message)s")
 
 connection_parameters = ConnectionParameters(
-    host='localhost',
+    host='rabbitmq',
     port=5672
 )
+
+def wait_for_rabbitmq():
+    while True:
+        try:
+            connection = BlockingConnection(connection_parameters)
+            connection.close()
+            logging.info('connection with rabbitmq established..')
+            break
+        except AMQPConnectionError:
+            logging.info("Waiting for RabbitMQ...")
+            time.sleep(5)
 
 
 def process_message(ch, method, properties, body: bytes):
     message = json.loads(body)
-    print(
-        f'Consumer info: Received message from user: "{message['user_alias']}"'
-        + f' a message: "{message['message']}"')
+    logging.info(f'''Consumer info: Received message from user: "{message['user_alias']}"'''
+                 f''' a message: "{message['message']}"''')
 
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
@@ -26,7 +43,7 @@ def producer(ch, message):
         routing_key="messages_publisher",
         body=json.dumps(message)
     )
-    print("Producer info: Uppercased message sent to Publisher service\n")
+    logging.info("Producer info: Uppercased message sent to Publisher service\n")
 
 
 def consumer():
@@ -37,9 +54,10 @@ def consumer():
                 queue="messages_scream",
                 on_message_callback=process_message
             )
-            print('waiting for messages...')
+            logging.info('waiting for messages...')
             ch.start_consuming()
 
 
 if __name__ == '__main__':
+    wait_for_rabbitmq()
     consumer()
