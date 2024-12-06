@@ -1,26 +1,8 @@
 services:
-  rabbitmq:
-    image: rabbitmq:3.10.7-management
-    hostname: rabbitmq
-    ports:
-      - 15672:15672
-      - 5673:5673
-    healthcheck:
-      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping || exit 1"]
-      interval: 20s
-      timeout: 5s
-      retries: 5
-      start_period: 120s
-
   api:
     build:
-      context: ./api
+      context: ./pipes
       dockerfile: Dockerfile
-    container_name: api_service
+    container_name: api
     ports:
       - 8000:8000
-    depends_on:
-      - rabbitmq
-    environment:
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_PORT=5672
